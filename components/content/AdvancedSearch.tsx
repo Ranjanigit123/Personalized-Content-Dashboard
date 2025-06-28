@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { RootState } from '@/store';
+import type { RootState, AppDispatch } from '@/store';
 import { searchContentAdvanced, clearSearchResults } from '@/store/slices/contentSlice';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,7 +15,7 @@ import { Search, Filter, X, Calendar, Tag, Globe } from 'lucide-react';
 import { useDebounce } from 'use-debounce';
 
 const AdvancedSearch: React.FC = () => {
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const { searchResults, searchLoading } = useSelector((state: RootState) => state.content);
   const [isExpanded, setIsExpanded] = useState(false);
   const [searchFilters, setSearchFilters] = useState({

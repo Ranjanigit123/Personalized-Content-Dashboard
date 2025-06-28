@@ -2,7 +2,7 @@
 
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { RootState } from '@/store';
+import { RootState, AppDispatch } from '@/store';
 import { fetchTrendingContent } from '@/store/slices/contentSlice';
 import ContentCard from './ContentCard';
 import ContentSkeleton from './ContentSkeleton';
@@ -10,7 +10,7 @@ import { motion } from 'framer-motion';
 import { TrendingUp } from 'lucide-react';
 
 const TrendingSection: React.FC = () => {
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const { trending, loading } = useSelector((state: RootState) => state.content);
 
   useEffect(() => {

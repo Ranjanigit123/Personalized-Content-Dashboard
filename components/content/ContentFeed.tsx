@@ -2,7 +2,7 @@
 
 import React, { useEffect, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { RootState } from '@/store';
+import { RootState, AppDispatch } from '@/store';
 import { fetchPersonalizedContent, reorderContent } from '@/store/slices/contentSlice';
 import ContentCard from './ContentCard';
 import ContentSkeleton from './ContentSkeleton';
@@ -55,7 +55,7 @@ const SortableContentCard: React.FC<SortableContentCardProps> = ({ item, index }
 };
 
 const ContentFeed: React.FC = () => {
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const { items, loading, hasMore, currentPage } = useSelector((state: RootState) => state.content);
   const { preferences } = useSelector((state: RootState) => state.user);
 

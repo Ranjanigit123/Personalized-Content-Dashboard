@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { RootState } from '@/store';
+import { RootState, AppDispatch } from '@/store';
 import { fetchMovieContent } from '@/store/slices/contentSlice';
 import ContentCard from './ContentCard';
 import ContentSkeleton from './ContentSkeleton';
@@ -14,7 +14,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 
 const MoviesFeed: React.FC = () => {
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const { movieContent, loading } = useSelector((state: RootState) => state.content);
   const [filter, setFilter] = useState('popular');
   const [genre, setGenre] = useState('all');

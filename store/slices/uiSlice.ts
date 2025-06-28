@@ -3,7 +3,7 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 interface UIState {
   darkMode: boolean;
   sidebarOpen: boolean;
-  currentView: 'feed' | 'trending' | 'favorites' | 'search';
+  currentView: 'feed' | 'trending' | 'favorites' | 'search'| 'movies' | 'social';
   searchQuery: string;
 }
 

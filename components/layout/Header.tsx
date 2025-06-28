@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { RootState } from '@/store';
+import type { RootState, AppDispatch } from '@/store';
 import { toggleSidebar, toggleDarkMode, setSearchQuery } from '@/store/slices/uiSlice';
 import { logout } from '@/store/slices/userSlice';
 import { searchContent, clearSearchResults } from '@/store/slices/contentSlice';
@@ -26,7 +26,7 @@ import {
 } from 'lucide-react';
 
 const Header: React.FC = () => {
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const { darkMode, searchQuery } = useSelector((state: RootState) => state.ui);
   const { searchLoading } = useSelector((state: RootState) => state.content);
   const { profile } = useSelector((state: RootState) => state.user);
