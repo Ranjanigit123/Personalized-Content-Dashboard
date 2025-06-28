@@ -87,6 +87,28 @@ const mockMovieData: ContentItem[] = [
     isFavorite: false,
     rating: 8.4,
   },
+  {
+    id: 'movie-7',
+    title: 'Action Hero Chronicles',
+    description: 'An explosive action movie with incredible stunts and non-stop thrills.',
+    imageUrl: 'https://images.pexels.com/photos/1117132/pexels-photo-1117132.jpeg?auto=compress&cs=tinysrgb&w=800',
+    category: 'action',
+    source: 'movies',
+    publishedAt: new Date(Date.now() - 518400000).toISOString(),
+    isFavorite: false,
+    rating: 8.0,
+  },
+  {
+    id: 'movie-8',
+    title: 'Comedy Central',
+    description: 'A hilarious comedy that will keep you laughing from start to finish.',
+    imageUrl: 'https://images.pexels.com/photos/1181675/pexels-photo-1181675.jpeg?auto=compress&cs=tinysrgb&w=800',
+    category: 'comedy',
+    source: 'movies',
+    publishedAt: new Date(Date.now() - 604800000).toISOString(),
+    isFavorite: false,
+    rating: 7.5,
+  },
 ];
 
 // Enhanced mock social media data
@@ -194,6 +216,32 @@ const mockSocialData: ContentItem[] = [
     likes: 423,
     engagement: 567,
     platform: 'Instagram',
+  },
+  {
+    id: 'social-9',
+    title: 'Movie night recommendations! 🎬',
+    description: 'Just watched some amazing movies this weekend. Here are my top picks for your next movie night! #movies #entertainment #recommendations',
+    imageUrl: 'https://images.pexels.com/photos/7991579/pexels-photo-7991579.jpeg?auto=compress&cs=tinysrgb&w=800',
+    category: 'entertainment',
+    source: 'social',
+    publishedAt: new Date(Date.now() - 28800000).toISOString(),
+    isFavorite: false,
+    likes: 892,
+    engagement: 1156,
+    platform: 'Twitter',
+  },
+  {
+    id: 'social-10',
+    title: 'Social media marketing tips 📱',
+    description: 'Sharing some effective social media strategies that helped grow my business. These tips really work! #socialmedia #marketing #business',
+    imageUrl: 'https://images.pexels.com/photos/267350/pexels-photo-267350.jpeg?auto=compress&cs=tinysrgb&w=800',
+    category: 'business',
+    source: 'social',
+    publishedAt: new Date(Date.now() - 32400000).toISOString(),
+    isFavorite: false,
+    likes: 678,
+    engagement: 945,
+    platform: 'LinkedIn',
   },
 ];
 
@@ -587,69 +635,127 @@ export const contentAPI = {
 
   async searchContent(query: string) {
     try {
-      const promises = [
-        newsAPI.get('/everything', {
+      const lowerQuery = query.toLowerCase();
+      const items: ContentItem[] = [];
+
+      // Search in movies (both API and mock data)
+      if (lowerQuery.includes('movie') || lowerQuery.includes('film') || lowerQuery.includes('cinema')) {
+        // Add all movie content when searching for "movies"
+        items.push(...mockMovieData);
+      } else {
+        // Search movie titles and descriptions
+        const movieMatches = mockMovieData.filter(movie =>
+          movie.title.toLowerCase().includes(lowerQuery) ||
+          movie.description.toLowerCase().includes(lowerQuery) ||
+          movie.category.toLowerCase().includes(lowerQuery)
+        );
+        items.push(...movieMatches);
+      }
+
+      // Search in social content
+      if (lowerQuery.includes('social') || lowerQuery.includes('post') || lowerQuery.includes('tweet')) {
+        // Add all social content when searching for "social"
+        items.push(...mockSocialData);
+      } else {
+        // Search social titles and descriptions
+        const socialMatches = mockSocialData.filter(post =>
+          post.title.toLowerCase().includes(lowerQuery) ||
+          post.description.toLowerCase().includes(lowerQuery) ||
+          post.category.toLowerCase().includes(lowerQuery) ||
+          (post.platform && post.platform.toLowerCase().includes(lowerQuery))
+        );
+        items.push(...socialMatches);
+      }
+
+      // Search in news (try API first, then fallback)
+      try {
+        const newsResponse = await newsAPI.get('/everything', {
           params: {
             q: query,
             pageSize: 10,
             sortBy: 'relevancy',
           },
-        }),
-        tmdbAPI.get('/search/movie', {
+        });
+
+        if (newsResponse.data.articles) {
+          const newsItems = newsResponse.data.articles
+            .filter((article: any) => article.title && article.urlToImage)
+            .map((article: any) => ({
+              id: `search-news-${article.url}`,
+              title: article.title,
+              description: article.description || '',
+              imageUrl: article.urlToImage,
+              category: 'news',
+              source: 'news' as const,
+              url: article.url,
+              publishedAt: article.publishedAt,
+              isFavorite: false,
+            }));
+          items.push(...newsItems);
+        }
+      } catch (newsError) {
+        console.log('News API search failed, using mock data');
+        // Fallback to mock news data
+        const mockNewsData = [
+          {
+            id: 'news-1',
+            title: 'Breaking: Technology News Update',
+            description: 'Latest developments in the tech industry that are shaping our future.',
+            imageUrl: 'https://images.pexels.com/photos/2582937/pexels-photo-2582937.jpeg?auto=compress&cs=tinysrgb&w=800',
+            category: 'technology',
+            source: 'news' as const,
+            publishedAt: new Date().toISOString(),
+            isFavorite: false,
+          },
+        ];
+        
+        if (lowerQuery.includes('news') || lowerQuery.includes('tech')) {
+          items.push(...mockNewsData);
+        }
+      }
+
+      // Try TMDB movie search
+      try {
+        const moviesResponse = await tmdbAPI.get('/search/movie', {
           params: {
             query,
           },
-        }),
-      ];
+        });
 
-      const [newsResponse, moviesResponse] = await Promise.allSettled(promises);
-      const items: ContentItem[] = [];
-
-      if (newsResponse.status === 'fulfilled' && newsResponse.value.data.articles) {
-        const newsItems = newsResponse.value.data.articles
-          .filter((article: any) => article.title && article.urlToImage)
-          .map((article: any) => ({
-            id: `search-news-${article.url}`,
-            title: article.title,
-            description: article.description || '',
-            imageUrl: article.urlToImage,
-            category: 'news',
-            source: 'news' as const,
-            url: article.url,
-            publishedAt: article.publishedAt,
-            isFavorite: false,
-          }));
-        items.push(...newsItems);
+        if (moviesResponse.data.results) {
+          const movieItems = moviesResponse.data.results
+            .filter((movie: any) => movie.poster_path)
+            .slice(0, 5) // Limit to avoid too many results
+            .map((movie: any) => ({
+              id: `search-movie-${movie.id}`,
+              title: movie.title,
+              description: movie.overview,
+              imageUrl: `https://image.tmdb.org/t/p/w500${movie.poster_path}`,
+              category: 'entertainment',
+              source: 'movies' as const,
+              publishedAt: movie.release_date,
+              isFavorite: false,
+              rating: movie.vote_average,
+            }));
+          items.push(...movieItems);
+        }
+      } catch (movieError) {
+        console.log('TMDB search failed, using mock data');
       }
 
-      if (moviesResponse.status === 'fulfilled' && moviesResponse.value.data.results) {
-        const movieItems = moviesResponse.value.data.results
-          .filter((movie: any) => movie.poster_path)
-          .map((movie: any) => ({
-            id: `search-movie-${movie.id}`,
-            title: movie.title,
-            description: movie.overview,
-            imageUrl: `https://image.tmdb.org/t/p/w500${movie.poster_path}`,
-            category: 'entertainment',
-            source: 'movies' as const,
-            publishedAt: movie.release_date,
-            isFavorite: false,
-            rating: movie.vote_average,
-          }));
-        items.push(...movieItems);
-      }
-
-      // Filter social posts by query
-      const socialMatches = mockSocialPosts.filter(post =>
-        post.title.toLowerCase().includes(query.toLowerCase()) ||
-        post.description.toLowerCase().includes(query.toLowerCase())
+      // Remove duplicates based on ID
+      const uniqueItems = items.filter((item, index, self) => 
+        index === self.findIndex(t => t.id === item.id)
       );
-      items.push(...socialMatches);
 
-      return items;
+      return uniqueItems;
     } catch (error) {
       console.error('Error searching content:', error);
-      return [];
+      // Return some default search results
+      return [
+        ...mockMovieData.slice(0, 3),
+        ...mockSocialData.slice(0, 3)
+      ];
     }
   },
 
