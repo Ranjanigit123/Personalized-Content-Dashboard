@@ -2,7 +2,7 @@
 
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { RootState } from '@/store';
+import { RootState, AppDispatch } from '@/store';
 import { fetchTrendingByCategory } from '@/store/slices/contentSlice';
 import ContentCard from './ContentCard';
 import ContentSkeleton from './ContentSkeleton';
@@ -17,7 +17,7 @@ const trendingCategories = [
 ];
 
 const TrendingCategories: React.FC = () => {
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const { trendingByCategory, loading } = useSelector((state: RootState) => state.content);
 
   useEffect(() => {
