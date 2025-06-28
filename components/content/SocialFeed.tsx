@@ -14,8 +14,10 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
+import { AppDispatch } from '@/store'; // Add this import at the top with others
+
 const SocialFeed: React.FC = () => {
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const { socialContent, loading } = useSelector((state: RootState) => state.content);
   const [platform, setPlatform] = useState('all');
   const [contentType, setContentType] = useState('all');
